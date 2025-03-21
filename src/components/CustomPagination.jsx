@@ -16,7 +16,12 @@ export const CustomPagination = ({ currentPage, pageSize, total, onChangePage })
         pageSize={pageSize}
         total={total}
         onChange={onChangePage}
-        showSizeChanger={false}
+        showSizeChanger
+        pageSizeOptions={['10', '20', '50', '100']}
+        defaultCurrent={1}
+        defaultPageSize={10}
+        showTotal={(total) => `Total ${total} usuários`}
+        locale={{ items_per_page: '/pág' }}
       />
     </PaginationContainer>
   );

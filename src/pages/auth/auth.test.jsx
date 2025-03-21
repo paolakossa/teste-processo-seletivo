@@ -1,86 +1,106 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { it, expect, describe, vi, beforeEach } from 'vitest';
-import { Auth } from '.';
-import TestWrapper from '../../../__tests__/utils/testWrapper';
-import axios from 'axios';
-import { store } from '../../store/store';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { expect, vi, describe, it, beforeEach } from 'vitest';
+import { Auth } from './index';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
+import { configureStore } from '@reduxjs/toolkit';
+import userDataReducer, { loginStart } from '../../store/auth/authSlice';
 
-vi.mock('axios');
+const mockNavigate = vi.fn();
 
-describe('Auth Component', () => {
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
+const renderAuth = (preloadedState = {}) => {
+  const store = configureStore({
+    reducer: {
+      userData: userDataReducer,
+    },
+    preloadedState,
+  });
+
+  store.dispatch = vi.fn();
+
+  const utils = render(
+    <Provider store={store}>
+      <MemoryRouter>
+        <Auth />
+      </MemoryRouter>
+    </Provider>,
+  );
+
+  return { ...utils, store };
+};
+
+describe('Auth Page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should render the email, password fields, and the submit button', () => {
-    render(
-      <TestWrapper>
-        <Auth />
-      </TestWrapper>,
-    );
-    // Check if the fields and the button are present in the document
-    expect(screen.getByTestId('emailInput')).toBeInTheDocument();
-    expect(screen.getByTestId('passwordInput')).toBeInTheDocument();
-    expect(screen.getByTestId('submitButton')).toBeInTheDocument();
+  it('deve renderizar o formulário de login', () => {
+    renderAuth({
+      userData: {
+        token: null,
+        error: null,
+      },
+    });
+
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/senha/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /entrar/i })).toBeInTheDocument();
   });
 
-  it('should successfully submit the form and process the API response', async () => {
-    // Mock axios to simulate a successful response
-    const mockSuccessResponse = { token: 'QpwL5tke4Pnpja7X4' };
-    axios.post.mockResolvedValue({ data: mockSuccessResponse });
+  it('deve corresponder ao snapshot', () => {
+    const { container } = renderAuth({
+      userData: {
+        token: null,
+        error: null,
+      },
+    });
 
-    render(
-      <TestWrapper>
-        <Auth />
-      </TestWrapper>,
-    );
+    expect(container).toMatchSnapshot();
+  });
 
-    const emailInput = screen.getByTestId('emailInput');
-    const passwordInput = screen.getByTestId('passwordInput');
-    const submitButton = screen.getByTestId('submitButton');
+  it('deve despachar loginStart ao enviar o formulário com dados válidos', async () => {
+    const { store } = renderAuth({
+      userData: {
+        token: null,
+        error: null,
+      },
+    });
 
-    // Fill in the form fields
-    fireEvent.change(emailInput, { target: { value: 'eve.holt@reqres.in' } });
-    fireEvent.change(passwordInput, { target: { value: 'cityslicka' } });
+    const emailInput = screen.getByPlaceholderText(/email/i);
+    const passwordInput = screen.getByPlaceholderText(/senha/i);
+    const submitButton = screen.getByRole('button', { name: /entrar/i });
+
+    fireEvent.change(emailInput, { target: { value: 'teste@email.com' } });
+    fireEvent.change(passwordInput, { target: { value: '123456' } });
     fireEvent.click(submitButton);
 
-    // Check if axios.post was called with the correct data
     await waitFor(() => {
-      expect(axios.post).toHaveBeenCalledWith(expect.any(String), {
-        email: 'eve.holt@reqres.in',
-        password: 'cityslicka',
-      });
+      expect(store.dispatch).toHaveBeenCalledWith(
+        loginStart({
+          email: 'teste@email.com',
+          password: '123456',
+        }),
+      );
     });
   });
 
-  it('should log an error to the console when the API returns an error', async () => {
-    // Mock axios to simulate an error response from the API
-    const mockErrorResponse = { error: 'Missing password' };
-    const error = { response: { data: mockErrorResponse } };
-    vi.spyOn(axios, 'post').mockRejectedValueOnce(error);
-
-    render(
-      <TestWrapper>
-        <Auth />
-      </TestWrapper>,
-    );
-
-    const emailInput = screen.getByTestId('emailInput');
-    const passwordInput = screen.getByTestId('passwordInput');
-    const submitButton = screen.getByTestId('submitButton');
-
-    // Fill in the form with invalid data (no password)
-    fireEvent.change(emailInput, { target: { value: 'peter@klaven' } });
-    fireEvent.change(passwordInput, { target: { value: '' } });
-    fireEvent.click(submitButton);
-
-    // Wait for the API call and check if the error was logged to the console
-    await waitFor(() => {
-      const {
-        userData: { error },
-      } = store.getState();
-      expect(error).toEqual(mockErrorResponse.error);
+  it('deve redirecionar se houver token no estado', () => {
+    renderAuth({
+      userData: {
+        token: 'fake-token',
+        error: null,
+      },
     });
+
+    expect(mockNavigate).toHaveBeenCalledWith('/');
   });
 });

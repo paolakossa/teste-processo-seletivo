@@ -13,11 +13,22 @@ const { Content } = Layout;
 
 const StyledLayout = styled(Layout)`
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-color: #f7f9fa;
 `;
 
 const ContentContainer = styled(Content)`
-  padding: 1rem 2rem;
+  flex: 1;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+const ListName = styled.h2`
+  font-weight: 600;
+  font-size: 1.5rem;
+  font-family: 'Sora', sans-serif;
 `;
 
 const fetchUsers = async () => {
@@ -80,7 +91,7 @@ export const Home = () => {
     <StyledLayout>
       <Header />
       <ContentContainer>
-        <h2>Usuários</h2>
+        <ListName>Usuários</ListName>
         <SearchBar
           searchTerm={searchTerm}
           onSearchChange={(value) => {
@@ -89,7 +100,6 @@ export const Home = () => {
           }}
         />
         <UsersTable users={paginatedUsers} />
-        <p>Total {filteredUsers.length} usuários</p>
         <CustomPagination
           currentPage={currentPage}
           pageSize={pageSize}

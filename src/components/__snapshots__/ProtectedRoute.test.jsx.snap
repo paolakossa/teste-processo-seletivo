@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ProtectedRoute Component > deve corresponder ao snapshot quando logado 1`] = `
+<div>
+  <div>
+    Página protegida
+  </div>
+</div>
+`;

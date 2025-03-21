@@ -1,0 +1,47 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`EmailInput Component > deve corresponder ao snapshot 1`] = `
+.c0 {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.c1 {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+<div>
+  <form>
+    <div
+      class="c0"
+    >
+      <label
+        class="c1"
+        for="email"
+      >
+        Email
+      </label>
+      <input
+        class="ant-input css-dev-only-do-not-override-tjsggz ant-input-outlined"
+        id="email"
+        name="email"
+        placeholder="Seu email ou usuário"
+        type="text"
+        value=""
+      />
+    </div>
+    <button
+      type="submit"
+    >
+      Enviar
+    </button>
+    <button
+      type="button"
+    >
+      Validar
+    </button>
+  </form>
+</div>
+`;

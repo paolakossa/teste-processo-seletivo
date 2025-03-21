@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SubmitButton Component > deve corresponder ao snapshot 1`] = `
+.c0 {
+  width: 100%;
+}
+
+<div>
+  <button
+    class="ant-btn css-dev-only-do-not-override-tjsggz ant-btn-primary ant-btn-color-primary ant-btn-variant-solid c0"
+    type="submit"
+  >
+    <span>
+      Entrar
+    </span>
+  </button>
+</div>
+`;
